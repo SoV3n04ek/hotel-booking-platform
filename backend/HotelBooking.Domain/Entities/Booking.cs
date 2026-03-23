@@ -14,4 +14,12 @@ public class Booking : BaseEntity
     public DateTimeOffset DateCheckOut { get; set; }
 
     public decimal TotalPrice { get; set; }
+
+    public void CalculateTotalPrice(decimal priceAtBookingTime)
+    {
+        var days = (DateCheckOut - DateCheckIn).Days;
+        if (days <= 0) days = 1;
+
+        TotalPrice = priceAtBookingTime * days;
+    }
 }
