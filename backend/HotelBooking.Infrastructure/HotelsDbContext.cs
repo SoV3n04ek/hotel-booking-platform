@@ -1,9 +1,10 @@
+using HotelBooking.Application.Interfaces;
 using HotelBooking.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelBooking.Infrastructure;
 
-public class HotelsDbContext : DbContext
+public class HotelsDbContext : DbContext, IUnitOfWork
 {
     public HotelsDbContext(DbContextOptions<HotelsDbContext> options) : base(options) { }
 

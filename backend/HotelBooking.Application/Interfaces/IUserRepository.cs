@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using HotelBooking.Domain.Entities;
 
-namespace HotelBooking.Application.Interfaces
+namespace HotelBooking.Application.Interfaces;
+
+internal interface IUserRepository : IGenericRepository<User>
 {
-    internal class IUserRepository
-    {
-        // Find by email
-        // find by id
-    }
+    Task<User?> GetByEmailAsync(string email);
 }

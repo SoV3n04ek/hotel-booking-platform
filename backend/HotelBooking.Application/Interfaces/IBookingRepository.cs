@@ -1,6 +1,9 @@
-﻿namespace HotelBooking.Application.Interfaces;
+﻿using HotelBooking.Domain.Entities;
 
-public interface IBookingRepository
+namespace HotelBooking.Application.Interfaces;
+
+public interface IBookingRepository : IGenericRepository<Booking>
 {
-
+    Task<IEnumerable<Booking>> GetByUserIdAsync(int userId);
+    Task<bool> IsRoomAvailableAsync(int roomId, DateTimeOffset checkIn, DateTimeOffset checkOut);
 }
