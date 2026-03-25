@@ -42,4 +42,9 @@ public class BookingService : IBookingService
 
         return booking;
     }
+
+    public async Task<Booking?> GetBookingByIdAsync(int id)
+    {
+        return await _bookingRepository.GetByIdAsync(id);
+    }
 }
