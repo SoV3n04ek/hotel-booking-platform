@@ -2,6 +2,7 @@
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Services;
 using HotelBooking.Infrastructure;
+using HotelBooking.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelBooking.Api;
@@ -21,7 +22,7 @@ public class Program
         );
 
         builder.Services.AddScoped<IBookingService, BookingService>();
-        //builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+        builder.Services.AddScoped<IRoomRepository, RoomRepository>();
         builder.Services.AddScoped<IUnitOfWork, HotelsDbContext>();
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
