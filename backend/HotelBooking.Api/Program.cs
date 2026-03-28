@@ -21,9 +21,18 @@ public class Program
                    .UseSnakeCaseNamingConvention()
         );
 
-        builder.Services.AddScoped<IBookingService, BookingService>();
+        // Infrastracture
+        builder.Services.AddScoped<IBookingRepository, BookingRepository>();
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+        builder.Services.AddScoped<IHotelRepository, HotelRepository>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+        // Application
+        builder.Services.AddScoped<IBookingService, BookingService>();
+
+        // Database and Unit of Work
         builder.Services.AddScoped<IUnitOfWork, HotelsDbContext>();
+
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
