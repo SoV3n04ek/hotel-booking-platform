@@ -31,11 +31,14 @@ public class BookingController : ControllerBase
         }
     }
 
-    [HttpGet]
+    [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
         var booking = await _bookingService.GetBookingByIdAsync(id);
-        if (booking == null) return NotFound();
+        
+        if (booking == null) 
+            return NotFound(new { message = $"Booking with ID {id} not found." });
+
         return Ok(booking);
     }
 }
