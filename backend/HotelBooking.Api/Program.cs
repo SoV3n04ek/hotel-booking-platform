@@ -26,9 +26,10 @@ public class Program
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();
         builder.Services.AddScoped<IHotelRepository, HotelRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
-
+        
         // Application
         builder.Services.AddScoped<IBookingService, BookingService>();
+        builder.Services.AddScoped<IHotelService, HotelService>();
 
         // Database and Unit of Work
         builder.Services.AddScoped<IUnitOfWork, HotelsDbContext>();

@@ -1,9 +1,7 @@
 ﻿namespace HotelBooking.Application.DTOs.Bookings;
 
-public record CreateBookingRequest
-{
-    public int UserId;
-    public int RoomId;
-    public DateTimeOffset CheckIn;
-    public DateTimeOffset CheckOut;
-}
+public record CreateBookingRequest (
+    int UserId,
+    int RoomId,
+    DateTimeOffset CheckIn,
+    DateTimeOffset CheckOut);
