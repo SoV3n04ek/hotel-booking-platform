@@ -79,8 +79,6 @@ public class HotelsDbContext : DbContext, IUnitOfWork
                 .HasForeignKey(b => b.RoomId);
         });
 
-        // TODO: Rules for Room, User, Booking
-
         // User 
         modelBuilder.Entity<User>(entity =>
         {
