@@ -1,4 +1,5 @@
 
+using HotelBooking.Api.Middleware;
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Services;
 using HotelBooking.Infrastructure;
@@ -36,6 +37,10 @@ public class Program
         builder.Services.AddScoped<IUnitOfWork, HotelsDbContext>();
 
         builder.Services.AddControllers();
+
+        builder.Services.AddProblemDetails();
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 

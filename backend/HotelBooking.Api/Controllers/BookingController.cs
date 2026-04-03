@@ -18,17 +18,10 @@ public class BookingController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateBookingRequest request)
     {
-        try
-        {
-            var booking = await _bookingService.CreateBookingAsync(
+        var booking = await _bookingService.CreateBookingAsync(
                 request.UserId, request.RoomId, request.CheckIn, request.CheckOut);
 
-            return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking);
     }
 
     [HttpGet("{id}")]
