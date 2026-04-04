@@ -21,7 +21,7 @@ public class BookingController : ControllerBase
         var booking = await _bookingService.CreateBookingAsync(
                 request.UserId, request.RoomId, request.CheckIn, request.CheckOut);
 
-        return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking);
+        return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking); 
     }
 
     [HttpGet("{id}")]

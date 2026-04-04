@@ -1,4 +1,5 @@
-﻿using HotelBooking.Application.DTOs.Hotels;
+﻿using HotelBooking.Application.DTOs;
+using HotelBooking.Application.DTOs.Hotels;
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -16,28 +17,26 @@ public class HotelService : IHotelService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<HotelResponse>> SearchHotelsAsync(string? city, string? searchTerm)
+    public async Task<PagedResult<HotelResponse>> SearchHotelsAsync(string? city, int pageNumber = 1, int pageSize = 10)
     {
-        IQueryable<Hotel> query = _hotelRepository.GetAll().AsNoTracking();
+        var query = _hotelRepository.GetAll().AsNoTracking();
 
-        if (!string.IsNullOrWhiteSpace(city))
+        if (!string.IsNullOrEmpty(city))
         {
             query = query.Where(h => h.Address.Contains(city));
         }
 
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            query = query.Where(h => h.Name.Contains(searchTerm) || h.Description.Contains(searchTerm));
-        }
+        var totalCount = await query.CountAsync();
 
-        return await query
-            .Select(h => new HotelResponse(
-                h.Id,
-                h.Name,
-                h.Address,
-                h.Description,
-                h.Rooms.Count))
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .Select(h => new HotelResponse(h.Id, h.Name, h.Address, h.Description, h.Rooms.Count))
             .ToListAsync();
+
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        return new PagedResult<HotelResponse>(items, pageNumber, pageSize, totalCount, totalPages);
     }
 
     public async Task<HotelResponse?> GetByIdAsync(int id)
