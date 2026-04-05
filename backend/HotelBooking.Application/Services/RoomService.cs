@@ -14,15 +14,17 @@ public class RoomService : IRoomService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<RoomResponse>> GetAvailableRoomAsync(int hotelId, DateTimeOffset start, DateTimeOffset end)
+    public async Task<IEnumerable<RoomResponse>> GetAvailableRoomsByHotelIdAsync(int hotelId, DateTimeOffset checkIn, DateTimeOffset checkOut)
     {
-        // business validation
-        if (start >= end)
+        if (checkIn >= checkOut)
+            throw new ArgumentException("Check-in date must be earlier than check-out date.");
+
+        if (checkIn < DateTimeOffset.UtcNow)
         {
-            throw new ArgumentException("Check-in date must be before check-out date.");
+            throw new ArgumentException("Cannot check in for a date in the past.");
         }
 
-        var rooms = await _roomRepository.GetAvailableRoomsAsync(hotelId, start, end);
+        var rooms = await _roomRepository.GetAvailableRoomsAsync(hotelId, checkIn, checkOut);
 
         return rooms.Select(r => new RoomResponse(
             r.Id,

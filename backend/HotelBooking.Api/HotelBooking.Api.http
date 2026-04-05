@@ -1,6 +1,50 @@
-@HotelBooking.Api_HostAddress = http://localhost:5098
+@hostname = localhost
+@port = 7251
+@host = https://{{hostname}}:{{port}}
+@hotelId = 3
+@bookingId = 1
+@roomId = 1
 
-GET {{HotelBooking.Api_HostAddress}}/weatherforecast/
+### \\\\ HOTEL endpoints ////
+
+### Create new hotel
+POST {{host}}/api/Hotel
+Content-Type: application/json
+
+{
+  "name": "Grand Central Hotel",
+  "address": "Kyiv, Khershchatyk St, 1",
+  "description": "Luxurious hotel in the heart of the capital with a great view."
+}
+
+### Hotel searching (with pagination and sorting)
+GET {{host}}/api/Hotel/search?city=Kyiv&searchTerm=Grand&pageNumber=1&pageSize=5&sortBy=name&sortOrder=asc
 Accept: application/json
 
-###
+### Get specific Hotel by id
+GET {{host}}/api/Hotel/{{hotelId}}
+Accept: application/json
+
+### \\\ BOOKING endpoints ////
+
+### Create booking
+POST {{host}}/api/Booking
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "roomId": {{roomId}},
+  "checkIn": "2026-06-01T14:00:00Z",
+  "checkOut": "2026-06-10T11:00:00Z"
+}
+
+### Get booking by id 
+GET {{host}}/api/Booking/{{bookingId}}
+Accept: application/json
+
+### Get data about available hotels in specific dates
+@checkIn = 2026-08-01T14:00:00Z
+@checkOut = 2026-08-10T11:00:00Z
+
+GET {{host}}/api/Hotel/{{hotelId}}/rooms?checkIn={{checkIn}}&checkOut={{checkOut}}
+Accept: application/json

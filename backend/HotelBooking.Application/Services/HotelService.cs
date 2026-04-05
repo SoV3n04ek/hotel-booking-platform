@@ -17,26 +17,41 @@ public class HotelService : IHotelService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<PagedResult<HotelResponse>> SearchHotelsAsync(string? city, int pageNumber = 1, int pageSize = 10)
+    public async Task<PagedResult<HotelResponse>> SearchHotelsAsync(
+        HotelSearchParameters parameters)
     {
         var query = _hotelRepository.GetAll().AsNoTracking();
 
-        if (!string.IsNullOrEmpty(city))
-        {
-            query = query.Where(h => h.Address.Contains(city));
-        }
+        if (!string.IsNullOrWhiteSpace(parameters.City))
+            query = query.Where(h => h.Address.Contains(parameters.City));
 
+        if (!string.IsNullOrEmpty(parameters.SearchTerm))
+            query = query.Where(h => h.Name.Contains(parameters.SearchTerm) || h.Description.Contains(parameters.SearchTerm));
+
+        query = parameters.SortBy?.ToLower() switch
+        {
+            "name" => parameters.SortOrder == "desc" ? query.OrderByDescending(h => h.Name) : query.OrderBy(h => h.Name),
+            "address" => parameters.SortOrder == "desc" ? query.OrderByDescending(h => h.Address) : query.OrderBy(h => h.Address),
+            _ => query.OrderBy(h => h.Id)
+        };
+
+        // Pagination
         var totalCount = await query.CountAsync();
 
         var items = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .Select(h => new HotelResponse(h.Id, h.Name, h.Address, h.Description, h.Rooms.Count))
+            .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+            .Take(parameters.PageSize)
+            .Select(h => new HotelResponse(
+                h.Id,
+                h.Name,
+                h.Address,
+                h.Description,
+                h.Rooms.Count))
             .ToListAsync();
 
-        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        var totalPages = (int)Math.Ceiling(totalCount / (double)parameters.PageSize);
 
-        return new PagedResult<HotelResponse>(items, pageNumber, pageSize, totalCount, totalPages);
+        return new PagedResult<HotelResponse>(items, parameters.PageNumber, parameters.PageSize, totalCount, totalPages);
     }
 
     public async Task<HotelResponse?> GetByIdAsync(int id)
