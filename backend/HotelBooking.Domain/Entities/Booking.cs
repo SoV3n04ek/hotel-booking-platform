@@ -14,6 +14,7 @@ public class Booking : BaseEntity
     public DateTimeOffset DateCheckOut { get; set; }
 
     public decimal TotalPrice { get; set; }
+    public BookingStatus Status { get; set; } = BookingStatus.Pending;
 
     public void CalculateTotalPrice(decimal priceAtBookingTime)
     {

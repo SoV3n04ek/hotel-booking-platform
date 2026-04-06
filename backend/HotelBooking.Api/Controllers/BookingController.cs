@@ -19,7 +19,7 @@ public class BookingController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateBookingRequest request)
     {
         var booking = await _bookingService.CreateBookingAsync(
-                request.UserId, request.RoomId, request.CheckIn, request.CheckOut);
+                new CreateBookingRequest(request.UserId, request.RoomId, request.CheckIn, request.CheckOut));
 
         return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking); 
     }

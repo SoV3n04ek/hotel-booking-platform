@@ -1,4 +1,5 @@
-﻿using HotelBooking.Application.Interfaces;
+﻿using HotelBooking.Application.DTOs.Bookings;
+using HotelBooking.Application.Interfaces;
 using HotelBooking.Domain.Entities;
 
 namespace HotelBooking.Application.Services;
@@ -16,31 +17,45 @@ public class BookingService : IBookingService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Booking> CreateBookingAsync(int userId, int roomId, DateTimeOffset checkIn, DateTimeOffset checkOut)
+    public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request)
     {
-        bool isAvailable = await _bookingRepository.IsRoomAvailableAsync(roomId, checkIn, checkOut);
-        if (isAvailable is false)
-        {
-            throw new Exception("The room has already been booked for those dates.");
-        }
+        if (request.CheckIn < DateTimeOffset.UtcNow)
+            throw new ArgumentException("Cannot book for past dates.");
 
-        var room = await _roomRepository.GetByIdAsync(roomId);
-        if (room == null)
-            throw new Exception("Room hasn't founded.");
+        bool isAvailable = await _roomRepository.IsRoomAvailableAsync(
+            request.RoomId, request.CheckIn, request.CheckOut);
+
+        if (!isAvailable)
+            throw new InvalidOperationException("Room is already occupied for these dates.");
+
+        var room = await _roomRepository.GetByIdAsync(request.RoomId);
+        if (room == null) throw new KeyNotFoundException("Room not found.");
+
+        var totalDays = (request.CheckOut - request.CheckIn).Days;
+        if (totalDays <= 0) throw new ArgumentException("Minimum stay is 1 night.");
 
         var booking = new Booking
         {
-            UserId = userId,
-            RoomId = roomId,
-            DateCheckIn = checkIn,
-            DateCheckOut = checkOut
+            UserId = request.UserId,
+            RoomId = request.RoomId,
+            DateCheckIn = request.CheckIn,
+            DateCheckOut = request.CheckOut,
+            TotalPrice = totalDays * room.PricePerNight,
+            Status = BookingStatus.Confirmed
         };
-        booking.CalculateTotalPrice(room.PricePerNight);
 
         await _bookingRepository.AddAsync(booking);
         await _unitOfWork.SaveChangesAsync();
 
-        return booking;
+        return new BookingResponse(
+            booking.Id,
+            booking.RoomId,
+            booking.UserId,
+            booking.DateCheckIn,
+            booking.DateCheckOut,
+            booking.TotalPrice,
+            booking.Status.ToString()
+        );
     }
 
     public async Task<Booking?> GetBookingByIdAsync(int id)
