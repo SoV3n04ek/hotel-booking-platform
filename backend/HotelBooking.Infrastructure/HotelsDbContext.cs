@@ -114,7 +114,12 @@ public class HotelsDbContext : DbContext, IUnitOfWork
             entity.Property(b => b.TotalPrice)
                 .HasPrecision(18, 2)
                 .IsRequired();
-            
+
+            entity.Property(b => b.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired();
+
             entity.Property(b => b.DateCheckIn).IsRequired();
 
             entity.Property(b => b.DateCheckOut).IsRequired();
