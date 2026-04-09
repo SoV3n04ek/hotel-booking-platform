@@ -1,7 +1,9 @@
 
+using FluentValidation;
 using HotelBooking.Api.Middleware;
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Services;
+using HotelBooking.Application.Validators;
 using HotelBooking.Infrastructure;
 using HotelBooking.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +34,9 @@ public class Program
         // Application
         builder.Services.AddScoped<IBookingService, BookingService>();
         builder.Services.AddScoped<IHotelService, HotelService>();
+        // Validation
+        builder.Services.AddValidatorsFromAssemblyContaining<CreateBookingRequestValidator>();
+        builder.Services.AddValidatorsFromAssemblyContaining<BookingValidator>();
 
         // Database and Unit of Work
         builder.Services.AddScoped<IUnitOfWork, HotelsDbContext>();

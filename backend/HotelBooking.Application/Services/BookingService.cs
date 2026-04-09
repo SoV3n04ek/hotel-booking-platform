@@ -1,5 +1,7 @@
-﻿using HotelBooking.Application.DTOs.Bookings;
+﻿using FluentValidation;
+using HotelBooking.Application.DTOs.Bookings;
 using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Validators;
 using HotelBooking.Domain.Entities;
 
 namespace HotelBooking.Application.Services;
@@ -9,18 +11,23 @@ public class BookingService : IBookingService
     private readonly IBookingRepository _bookingRepository;
     private readonly IRoomRepository _roomRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IValidator<CreateBookingRequest> _validator;
 
-    public BookingService(IBookingRepository bookingRepository, IRoomRepository roomRepository, IUnitOfWork unitOfWork)
+    public BookingService(
+        IBookingRepository bookingRepository, 
+        IRoomRepository roomRepository, 
+        IUnitOfWork unitOfWork, 
+        IValidator<CreateBookingRequest> validator)
     {
         _bookingRepository = bookingRepository;
         _roomRepository = roomRepository;
         _unitOfWork = unitOfWork;
+        _validator = validator;
     }
 
     public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request)
     {
-        if (request.CheckIn < DateTimeOffset.UtcNow)
-            throw new ArgumentException("Cannot book for past dates.");
+        await _validator.ValidateAndThrowAsync(request);
 
         bool isAvailable = await _roomRepository.IsRoomAvailableAsync(
             request.RoomId, request.CheckIn, request.CheckOut);

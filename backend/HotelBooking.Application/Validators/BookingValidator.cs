@@ -16,5 +16,7 @@ public class BookingValidator : AbstractValidator<Booking>
             .WithMessage("The departure date must be later than the arrival date.");
 
         RuleFor(x => x.UserId).NotEmpty();
+        RuleFor(x => x.UserId).GreaterThan(0);
+        RuleFor(x => x.RoomId).GreaterThan(0);
     }
 }
