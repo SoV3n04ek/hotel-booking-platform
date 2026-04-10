@@ -1,8 +1,10 @@
 ﻿using FluentValidation;
 using HotelBooking.Application.DTOs.Bookings;
 using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Mappers;
 using HotelBooking.Application.Validators;
 using HotelBooking.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelBooking.Application.Services;
 
@@ -37,6 +39,7 @@ public class BookingService : IBookingService
 
         var room = await _roomRepository.GetByIdAsync(request.RoomId);
         if (room == null) throw new KeyNotFoundException("Room not found.");
+        _roomRepository.Update(room);
 
         var totalDays = (request.CheckOut - request.CheckIn).Days;
         if (totalDays <= 0) throw new ArgumentException("Minimum stay is 1 night.");
@@ -52,17 +55,17 @@ public class BookingService : IBookingService
         };
 
         await _bookingRepository.AddAsync(booking);
-        await _unitOfWork.SaveChangesAsync();
 
-        return new BookingResponse(
-            booking.Id,
-            booking.RoomId,
-            booking.UserId,
-            booking.DateCheckIn,
-            booking.DateCheckOut,
-            booking.TotalPrice,
-            booking.Status.ToString()
-        );
+        try
+        {
+            await _unitOfWork.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new InvalidOperationException("This room was just booked by someone else. Please refresh.");
+        }
+
+        return booking.ToResponse();
     }
 
     public async Task<Booking?> GetBookingByIdAsync(int id)
