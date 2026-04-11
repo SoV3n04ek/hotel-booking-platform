@@ -8,7 +8,7 @@ public class RoomRepository : GenericRepository<Room>, IRoomRepository
 {
     public RoomRepository(HotelsDbContext context) : base(context) { }
 
-    public async Task<bool> IsRoomAvailableAsync(int roomId, DateTimeOffset start, DateTimeOffset end)
+    public async Task<bool> IsRoomAvailableAsync(int roomId, DateTimeOffset start, DateTimeOffset end, CancellationToken ct)
     {
         return !await _context.Bookings.AnyAsync(b =>
             b.RoomId == roomId &&

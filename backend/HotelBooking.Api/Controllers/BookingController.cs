@@ -16,7 +16,7 @@ public class BookingController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateBookingRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateBookingRequest request, CancellationToken ct = default)
     {
         var booking = await _bookingService.CreateBookingAsync(
                 new CreateBookingRequest(request.UserId, request.RoomId, request.CheckIn, request.CheckOut));

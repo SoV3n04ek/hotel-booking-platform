@@ -27,12 +27,14 @@ public class BookingService : IBookingService
         _validator = validator;
     }
 
-    public async Task<BookingResponse> CreateBookingAsync(CreateBookingRequest request)
+    public async Task<BookingResponse> CreateBookingAsync(
+        CreateBookingRequest request,
+        CancellationToken ct = default)
     {
-        await _validator.ValidateAndThrowAsync(request);
+        await _validator.ValidateAndThrowAsync(request, ct);
 
         bool isAvailable = await _roomRepository.IsRoomAvailableAsync(
-            request.RoomId, request.CheckIn, request.CheckOut);
+            request.RoomId, request.CheckIn, request.CheckOut, ct);
 
         if (!isAvailable)
             throw new InvalidOperationException("Room is already occupied for these dates.");
@@ -54,11 +56,11 @@ public class BookingService : IBookingService
             Status = BookingStatus.Confirmed
         };
 
-        await _bookingRepository.AddAsync(booking);
+        await _bookingRepository.AddAsync(booking, ct);
 
         try
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(ct);
         }
         catch (DbUpdateConcurrencyException)
         {

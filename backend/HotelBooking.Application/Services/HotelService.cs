@@ -1,6 +1,7 @@
 ﻿using HotelBooking.Application.DTOs;
 using HotelBooking.Application.DTOs.Hotels;
 using HotelBooking.Application.Interfaces;
+using HotelBooking.Application.Mappers;
 using HotelBooking.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +11,7 @@ public class HotelService : IHotelService
 {
     private readonly IHotelRepository _hotelRepository;
     private readonly IUnitOfWork _unitOfWork;
-
+    
     public HotelService(IHotelRepository hotelRepository, IUnitOfWork unitOfWork)
     {
         _hotelRepository = hotelRepository;
@@ -18,7 +19,8 @@ public class HotelService : IHotelService
     }
 
     public async Task<PagedResult<HotelResponse>> SearchHotelsAsync(
-        HotelSearchParameters parameters)
+        HotelSearchParameters parameters,
+        CancellationToken ct = default)
     {
         var query = _hotelRepository.GetAll().AsNoTracking();
 
@@ -36,17 +38,12 @@ public class HotelService : IHotelService
         };
 
         // Pagination
-        var totalCount = await query.CountAsync();
+        var totalCount = await query.CountAsync(ct);
 
         var items = await query
             .Skip((parameters.PageNumber - 1) * parameters.PageSize)
             .Take(parameters.PageSize)
-            .Select(h => new HotelResponse(
-                h.Id,
-                h.Name,
-                h.Address,
-                h.Description,
-                h.Rooms.Count))
+            .Select(h => h.ToResponse())
             .ToListAsync();
 
         var totalPages = (int)Math.Ceiling(totalCount / (double)parameters.PageSize);
@@ -54,9 +51,9 @@ public class HotelService : IHotelService
         return new PagedResult<HotelResponse>(items, parameters.PageNumber, parameters.PageSize, totalCount, totalPages);
     }
 
-    public async Task<HotelResponse?> GetByIdAsync(int id)
+    public async Task<HotelResponse?> GetByIdAsync(int id, CancellationToken ct = default)
     {
-        var hotel = await _hotelRepository.GetByIdAsync(id);
+        var hotel = await _hotelRepository.GetByIdAsync(id, ct);
         if (hotel == null)
             return null;
 
@@ -68,7 +65,9 @@ public class HotelService : IHotelService
             0);
     }
 
-    public async Task<int> CreateHotelAsync(CreateHotelRequest request)
+    public async Task<int> CreateHotelAsync(
+        CreateHotelRequest request,
+        CancellationToken ct = default)
     {
         var hotel = new Hotel
         {
@@ -77,8 +76,8 @@ public class HotelService : IHotelService
             Description = request.Description
         };
 
-        await _hotelRepository.AddAsync(hotel);
-        await _unitOfWork.SaveChangesAsync();
+        await _hotelRepository.AddAsync(hotel, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         return hotel.Id;
     }

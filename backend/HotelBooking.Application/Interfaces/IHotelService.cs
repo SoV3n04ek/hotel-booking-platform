@@ -5,7 +5,7 @@ namespace HotelBooking.Application.Interfaces;
 
 public interface IHotelService
 {
-    Task<PagedResult<HotelResponse>> SearchHotelsAsync(HotelSearchParameters parameters);
-    Task<HotelResponse?> GetByIdAsync(int id);
-    Task<int> CreateHotelAsync(CreateHotelRequest request);
+    Task<PagedResult<HotelResponse>> SearchHotelsAsync(HotelSearchParameters parameters, CancellationToken ct = default);
+    Task<HotelResponse?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task<int> CreateHotelAsync(CreateHotelRequest request, CancellationToken ct = default);
 }

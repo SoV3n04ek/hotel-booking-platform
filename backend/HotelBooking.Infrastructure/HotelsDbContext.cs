@@ -73,6 +73,9 @@ public class HotelsDbContext : DbContext, IUnitOfWork
             
             entity.Property(r => r.Capacity).IsRequired();
 
+            entity.Property(r => r.Version)
+                .IsRowVersion();
+
             // 1:N (1 Room -> many Bookings)
             entity.HasMany(r => r.Bookings)
                 .WithOne(b => b.Room)

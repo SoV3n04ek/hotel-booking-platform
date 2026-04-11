@@ -16,9 +16,15 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 
     public IQueryable<T> GetAll() => _dbSet.AsNoTracking();
 
-    public async Task<T?> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
+    public async Task<T?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        return await _dbSet.FindAsync(new object[] { id }, ct);
+    }
 
-    public async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
+    public async Task AddAsync(T entity, CancellationToken ct = default)
+    {
+        await _dbSet.AddAsync(entity, ct);
+    }
 
     public void Update(T entity) => _dbSet.Update(entity);
 
