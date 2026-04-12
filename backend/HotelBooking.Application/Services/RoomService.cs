@@ -14,7 +14,11 @@ public class RoomService : IRoomService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<RoomResponse>> GetAvailableRoomsByHotelIdAsync(int hotelId, DateTimeOffset checkIn, DateTimeOffset checkOut)
+    public async Task<IEnumerable<RoomResponse>> GetAvailableRoomsByHotelIdAsync(
+        int hotelId,
+        DateTimeOffset checkIn,
+        DateTimeOffset checkOut,
+        CancellationToken ct = default)
     {
         if (checkIn >= checkOut)
             throw new ArgumentException("Check-in date must be earlier than check-out date.");
@@ -24,7 +28,7 @@ public class RoomService : IRoomService
             throw new ArgumentException("Cannot check in for a date in the past.");
         }
 
-        var rooms = await _roomRepository.GetAvailableRoomsAsync(hotelId, checkIn, checkOut);
+        var rooms = await _roomRepository.GetAvailableRoomsAsync(hotelId, checkIn, checkOut, ct);
 
         return rooms.Select(r => new RoomResponse(
             r.Id,

@@ -4,6 +4,6 @@ namespace HotelBooking.Application.Interfaces;
 
 public interface IRoomService
 {
-    Task<IEnumerable<RoomResponse>> GetAvailableRoomsByHotelIdAsync(int hotelId, DateTimeOffset checkIn, DateTimeOffset checkOut);
+    Task<IEnumerable<RoomResponse>> GetAvailableRoomsByHotelIdAsync(int hotelId, DateTimeOffset checkIn, DateTimeOffset checkOut, CancellationToken ct = default);
     Task<RoomResponse?> GetRoomByIdAsync(int id);
 }
