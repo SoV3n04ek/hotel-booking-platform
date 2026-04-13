@@ -2,7 +2,6 @@
 using HotelBooking.Application.DTOs.Bookings;
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Mappers;
-using HotelBooking.Application.Validators;
 using HotelBooking.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,18 +32,18 @@ public class BookingService : IBookingService
     {
         await _validator.ValidateAndThrowAsync(request, ct);
 
-        bool isAvailable = await _roomRepository.IsRoomAvailableAsync(
+        var room = await _roomRepository.GetRoomIfAvailableAsync(
             request.RoomId, request.CheckIn, request.CheckOut, ct);
 
-        if (!isAvailable)
+        if (room == null)
+        {
+            var exists = await _roomRepository.GetAll().AnyAsync(r => r.Id == request.RoomId, ct);
+            if (!exists)
+                throw new KeyNotFoundException("Room not found.");
+
             throw new InvalidOperationException("Room is already occupied for these dates.");
-
-        var room = await _roomRepository.GetByIdAsync(request.RoomId);
-        if (room == null) throw new KeyNotFoundException("Room not found.");
+        }
         _roomRepository.Update(room);
-
-        var totalDays = (request.CheckOut - request.CheckIn).Days;
-        if (totalDays <= 0) throw new ArgumentException("Minimum stay is 1 night.");
 
         var booking = new Booking
         {
@@ -52,10 +51,10 @@ public class BookingService : IBookingService
             RoomId = request.RoomId,
             DateCheckIn = request.CheckIn,
             DateCheckOut = request.CheckOut,
-            TotalPrice = totalDays * room.PricePerNight,
             Status = BookingStatus.Confirmed
         };
 
+        booking.CalculateTotalPrice(room.PricePerNight);
         await _bookingRepository.AddAsync(booking, ct);
 
         try
@@ -70,8 +69,8 @@ public class BookingService : IBookingService
         return booking.ToResponse();
     }
 
-    public async Task<Booking?> GetBookingByIdAsync(int id)
+    public async Task<Booking?> GetBookingByIdAsync(int id, CancellationToken ct = default)
     {
-        return await _bookingRepository.GetByIdAsync(id);
+        return await _bookingRepository.GetByIdAsync(id, ct);
     }
 }

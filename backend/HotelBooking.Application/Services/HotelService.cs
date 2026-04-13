@@ -57,12 +57,7 @@ public class HotelService : IHotelService
         if (hotel == null)
             return null;
 
-        return new HotelResponse(
-            hotel.Id,
-            hotel.Name,
-            hotel.Address,
-            hotel.Description,
-            0);
+        return hotel.ToResponse();
     }
 
     public async Task<int> CreateHotelAsync(

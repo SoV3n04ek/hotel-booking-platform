@@ -19,15 +19,15 @@ public class BookingController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateBookingRequest request, CancellationToken ct = default)
     {
         var booking = await _bookingService.CreateBookingAsync(
-                new CreateBookingRequest(request.UserId, request.RoomId, request.CheckIn, request.CheckOut));
+                new CreateBookingRequest(request.UserId, request.RoomId, request.CheckIn, request.CheckOut), ct);
 
         return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking); 
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById(int id, CancellationToken ct = default)
     {
-        var booking = await _bookingService.GetBookingByIdAsync(id);
+        var booking = await _bookingService.GetBookingByIdAsync(id, ct);
         
         if (booking == null) 
             return NotFound(new { message = $"Booking with ID {id} not found." });

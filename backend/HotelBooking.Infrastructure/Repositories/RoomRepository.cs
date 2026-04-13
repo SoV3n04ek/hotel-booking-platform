@@ -24,4 +24,14 @@ public class RoomRepository : GenericRepository<Room>, IRoomRepository
                 b.DateCheckIn < end && b.DateCheckOut > start))
             .ToListAsync(ct);
     }
+
+    public async Task<Room?> GetRoomIfAvailableAsync(int id, DateTimeOffset start, DateTimeOffset end, CancellationToken ct)
+    {
+        return await _context.Rooms
+            .Where(r => r.Id == id)
+            .Where(r => !r.Bookings.Any(b =>
+                b.DateCheckIn < end &&
+                b.DateCheckOut > start))
+            .FirstOrDefaultAsync(ct);
+    }
 }

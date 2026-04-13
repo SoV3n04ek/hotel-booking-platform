@@ -39,9 +39,9 @@ public class RoomService : IRoomService
         ));
     }
 
-    public async Task<RoomResponse?> GetRoomByIdAsync(int id)
+    public async Task<RoomResponse?> GetRoomByIdAsync(int id, CancellationToken ct = default)
     {
-        var room = await _roomRepository.GetByIdAsync(id);
+        var room = await _roomRepository.GetByIdAsync(id, ct);
 
         if (room == null) return null;
 
