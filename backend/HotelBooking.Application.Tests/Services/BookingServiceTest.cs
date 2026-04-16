@@ -125,4 +125,78 @@ public class BookingServiceTest
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("Room is already occupied for these dates.");
     }
+
+    [Fact]
+    public async Task CreateBooking_ShouldThrowConflict_WhenDbUpdateConcurrencyExceptionOccurs()
+    {
+        // Arrange
+        var request = new CreateBookingRequest(1, 1, _baseDate.AddDays(1), _baseDate.AddDays(2));
+        var room = new Room { Id = 1, PricePerNight = 100 };
+
+        _roomRepo.Setup(r => r.GetRoomIfAvailableAsync(It.IsAny<int>(), It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(room);
+
+        // Force EF Core concurrency exception
+        _uow.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new DbUpdateConcurrencyException());
+
+        // Act
+        var act = async () => await _service.CreateBookingAsync(request);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("This room was just booked by someone else. Please refresh.");
+    }
+
+    [Fact]
+    public async Task CreateBooking_ShouldCalculateCorrectPrice_ForMultiNightStay()
+    {
+        // Arrange
+        var price = 150.50m;
+        var stayDays = 3;
+        var room = new Room { Id = 1, PricePerNight = price };
+        var request = new CreateBookingRequest(1, 1, _baseDate, _baseDate.AddDays(stayDays));
+
+        _roomRepo.Setup(r => r.GetRoomIfAvailableAsync(It.IsAny<int>(), It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(room);
+
+        // Act
+        var result = await _service.CreateBookingAsync(request);
+
+        // Assert
+        result.TotalPrice.Should().Be(price * stayDays);
+    }
+
+    [Fact]
+    public async Task CreateBooking_ShouldStopExecution_WhenCancellationTokenIsTriggered()
+    {
+        // Arrange
+        var cts = new CancellationTokenSource();
+        cts.Cancel(); // Trigger cancellation immediately
+
+        var request = new CreateBookingRequest(1, 1, _baseDate, _baseDate.AddDays(1));
+
+        // Act
+        var act = async () => await _service.CreateBookingAsync(request, cts.Token);
+
+        // Assert
+        await act.Should().ThrowAsync<OperationCanceledException>();
+        _bookingRepo.Verify(r => r.AddAsync(It.IsAny<Booking>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetBookingById_ShouldReturnResponse_WhenBookingExists()
+    {
+        // Arrange
+        var bookingId = 42;
+        _bookingRepo.Setup(r => r.GetByIdAsync(bookingId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Booking { Id = bookingId });
+
+        // Act
+        var result = await _service.GetBookingByIdAsync(bookingId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Id.Should().Be(bookingId);
+    }
 }
