@@ -182,7 +182,7 @@ internal class TestAsyncEnumerable<T> : IAsyncEnumerable<T>, IQueryable<T>
     System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => _inner.GetEnumerator();
 }
 
-internal class TestAsyncEnumerator<T> : IAsyncEnumerator<T>
+internal partial class TestAsyncEnumerator<T> : IAsyncEnumerator<T>
 {
     private readonly IEnumerator<T> _inner;
     public TestAsyncEnumerator(IEnumerator<T> inner) => _inner = inner;
