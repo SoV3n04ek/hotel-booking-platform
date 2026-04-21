@@ -56,8 +56,8 @@ public class DbInitializer
                 Description = "Luxury hotel in the heart of the city.",
                 Rooms = new List<Room>
                 {
-                    new Room { PricePerNight = 150.00m, Capacity = 2, Version = 1 },
-                    new Room { PricePerNight = 250.00m, Capacity = 4, Version = 1 }
+                    new Room { PricePerNight = 150.00m, Capacity = 2 },
+                    new Room { PricePerNight = 250.00m, Capacity = 4 }
                 }
             };
 
@@ -68,8 +68,8 @@ public class DbInitializer
                 Description = "Relaxing resort with ocean views.",
                 Rooms = new List<Room>
                 {
-                    new Room { PricePerNight = 120.00m, Capacity = 2, Version = 1 },
-                    new Room { PricePerNight = 180.00m, Capacity = 3, Version = 1 }
+                    new Room { PricePerNight = 120.00m, Capacity = 2 },
+                    new Room { PricePerNight = 180.00m, Capacity = 3 }
                 }
             };
 

@@ -48,6 +48,8 @@ public class Program
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
+        
+        builder.Services.AddScoped<HotelBooking.Infrastructure.Persistence.DbInitializer>();
 
         var app = builder.Build();
 
@@ -58,6 +60,12 @@ public class Program
         {
             app.MapOpenApi();
             app.MapScalarApiReference();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var initializer = scope.ServiceProvider.GetRequiredService<HotelBooking.Infrastructure.Persistence.DbInitializer>();
+                await initializer.SeedAsync();
+            }
         }
 
         app.UseHttpsRedirection();
