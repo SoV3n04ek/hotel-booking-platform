@@ -3,6 +3,7 @@ using FluentAssertions;
 using HotelBooking.Application.DTOs.Hotels;
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Services;
+using HotelBooking.Application.Tests.Infrastructure.EfHelpers;
 using HotelBooking.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;

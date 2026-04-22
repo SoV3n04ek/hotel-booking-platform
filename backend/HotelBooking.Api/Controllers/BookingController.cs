@@ -1,4 +1,6 @@
-﻿using HotelBooking.Application.DTOs.Bookings;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using HotelBooking.Application.DTOs.Bookings;
 using HotelBooking.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,8 +20,7 @@ public class BookingController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateBookingRequest request, CancellationToken ct = default)
     {
-        var booking = await _bookingService.CreateBookingAsync(
-                new CreateBookingRequest(request.UserId, request.RoomId, request.CheckIn, request.CheckOut), ct);
+        var booking = await _bookingService.CreateBookingAsync(request, ct);
 
         return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking); 
     }

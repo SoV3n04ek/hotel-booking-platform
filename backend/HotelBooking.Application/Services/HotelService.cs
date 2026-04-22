@@ -24,18 +24,21 @@ public class HotelService : IHotelService
     {
         var query = _hotelRepository.GetAll().AsNoTracking();
 
+        // City filter
         if (!string.IsNullOrWhiteSpace(parameters.City))
-            query = query.Where(h => h.Address.Contains(parameters.City));
-
-        if (!string.IsNullOrEmpty(parameters.SearchTerm))
-            query = query.Where(h => h.Name.Contains(parameters.SearchTerm) || h.Description.Contains(parameters.SearchTerm));
-
-        query = parameters.SortBy?.ToLower() switch
         {
-            "name" => parameters.SortOrder == "desc" ? query.OrderByDescending(h => h.Name) : query.OrderBy(h => h.Name),
-            "address" => parameters.SortOrder == "desc" ? query.OrderByDescending(h => h.Address) : query.OrderBy(h => h.Address),
-            _ => query.OrderBy(h => h.Id)
-        };
+            var cityTerm = parameters.City.ToLower();
+            query = query.Where(h => h.Address.ToLower().Contains(cityTerm));
+        }
+
+        // Search term filter
+        if (!string.IsNullOrEmpty(parameters.SearchTerm))
+        {
+            var term = parameters.SearchTerm.ToLower();
+            query = query.Where(h =>
+                h.Name.ToLower().Contains(term) ||
+                h.Description.ToLower().Contains(term));
+        }
 
         // Pagination
         var totalCount = await query.CountAsync(ct);

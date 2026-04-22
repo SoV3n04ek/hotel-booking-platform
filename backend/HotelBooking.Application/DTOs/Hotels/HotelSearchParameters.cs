@@ -1,10 +1,17 @@
 ﻿namespace HotelBooking.Application.DTOs.Hotels;
 
-public record HotelSearchParameters(
-    string? City = null,
-    string? SearchTerm = null,
-    string SortBy = "name",
-    string SortOrder = "asc",
-    int PageNumber = 1,
-    int PageSize = 10
-);
+public record HotelSearchParameters
+{
+    public string? City { get; init; }
+    public string? SearchTerm { get; init; }
+
+    public int PageNumber { get; init; } = 1;
+    private int _pageSize = 10;
+    public int PageSize
+    {
+        get => _pageSize;
+        init => _pageSize = value is > 0 and <= 50 ? value : 10;
+    }
+    public string? SortBy { get; init; }
+    public string? SortOrder { get; init; }
+}

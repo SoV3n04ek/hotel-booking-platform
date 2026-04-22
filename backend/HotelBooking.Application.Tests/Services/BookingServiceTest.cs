@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Moq;
 using System.Linq.Expressions;
+using HotelBooking.Application.Tests.Infrastructure.EfHelpers;
 using Xunit;
 
 namespace HotelBooking.Application.Tests.Services;
@@ -35,11 +36,14 @@ public class BookingServiceTest
     public async Task CreateBooking_ShouldThrowValidationException_WhenDatesAreInvalid()
     {
         var request = new CreateBookingRequest(1, 1, _baseDate.AddDays(5), _baseDate.AddDays(2));
-        var failures = new List<ValidationFailure> { new("CheckOut", "The departure date must be later than the arrival date.") };
-
+        
         var act = async () => await _service.CreateBookingAsync(request);
 
-        await act.Should().ThrowAsync<ValidationException>().WithMessage("The check-out must be later than the check-in.");
+        var exception = await act.Should().ThrowAsync<ValidationException>();
+
+        exception.Which.Errors.Should().Contain(e =>
+            e.PropertyName == "CheckOut" &&
+            e.ErrorMessage.Contains("later than the check-in"));
     }
 
     [Fact]
@@ -143,50 +147,4 @@ public class BookingServiceTest
         result.Should().NotBeNull();
         result!.Id.Should().Be(42);
     }
-}
-
-// ------------------------------------------------------------------------------------------------
-// INFRASTRUCTURE MOCKS FOR EF CORE 9
-// ------------------------------------------------------------------------------------------------
-
-internal class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
-{
-    private readonly IQueryProvider _inner;
-    internal TestAsyncQueryProvider(IQueryProvider inner) => _inner = inner;
-    public IQueryable CreateQuery(Expression expression) => new TestAsyncEnumerable<TEntity>(expression);
-    public IQueryable<TElement> CreateQuery<TElement>(Expression expression) => new TestAsyncEnumerable<TElement>(expression);
-    public object? Execute(Expression expression) => _inner.Execute(expression);
-    public TResult Execute<TResult>(Expression expression) => _inner.Execute<TResult>(expression);
-    public TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
-    {
-        var expectedResultType = typeof(TResult).GetGenericArguments()[0];
-        var executionResult = typeof(IQueryProvider)
-            .GetMethod(nameof(IQueryProvider.Execute), 1, new[] { typeof(Expression) })
-            ?.MakeGenericMethod(expectedResultType)
-            .Invoke(this, new[] { expression });
-        return (TResult)typeof(Task).GetMethod(nameof(Task.FromResult))
-            ?.MakeGenericMethod(expectedResultType).Invoke(null, new[] { executionResult })!;
-    }
-}
-
-internal class TestAsyncEnumerable<T> : IAsyncEnumerable<T>, IQueryable<T>
-{
-    private readonly IQueryable<T> _inner;
-    public TestAsyncEnumerable(IEnumerable<T> enumerable) => _inner = enumerable.AsQueryable();
-    public TestAsyncEnumerable(Expression expression) => _inner = new EnumerableQuery<T>(expression);
-    public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default) => new TestAsyncEnumerator<T>(_inner.GetEnumerator());
-    public Type ElementType => _inner.ElementType;
-    public Expression Expression => _inner.Expression;
-    public IQueryProvider Provider => new TestAsyncQueryProvider<T>(_inner.Provider);
-    public IEnumerator<T> GetEnumerator() => _inner.GetEnumerator();
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => _inner.GetEnumerator();
-}
-
-internal partial class TestAsyncEnumerator<T> : IAsyncEnumerator<T>
-{
-    private readonly IEnumerator<T> _inner;
-    public TestAsyncEnumerator(IEnumerator<T> inner) => _inner = inner;
-    public ValueTask DisposeAsync() { _inner.Dispose(); return ValueTask.CompletedTask; }
-    public ValueTask<bool> MoveNextAsync() => ValueTask.FromResult(_inner.MoveNext());
-    public T Current => _inner.Current;
 }

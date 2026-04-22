@@ -1,4 +1,5 @@
 
+using System.Threading.Tasks;
 using FluentValidation;
 using HotelBooking.Api.Middleware;
 using HotelBooking.Application.Interfaces;
@@ -6,14 +7,18 @@ using HotelBooking.Application.Services;
 using HotelBooking.Application.Validators;
 using HotelBooking.Infrastructure;
 using HotelBooking.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Scalar.AspNetCore;
 
 namespace HotelBooking.Api;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -61,11 +66,9 @@ public class Program
             app.MapOpenApi();
             app.MapScalarApiReference();
 
-            using (var scope = app.Services.CreateScope())
-            {
-                var initializer = scope.ServiceProvider.GetRequiredService<HotelBooking.Infrastructure.Persistence.DbInitializer>();
-                await initializer.SeedAsync();
-            }
+            using var scope = app.Services.CreateScope();
+            var initializer = scope.ServiceProvider.GetRequiredService<HotelBooking.Infrastructure.Persistence.DbInitializer>();
+            await initializer.SeedAsync();
         }
 
         app.UseHttpsRedirection();

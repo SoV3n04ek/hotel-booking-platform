@@ -1,4 +1,7 @@
-﻿using HotelBooking.Application.DTOs;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using HotelBooking.Application.DTOs;
 using HotelBooking.Application.DTOs.Hotels;
 using HotelBooking.Application.DTOs.Rooms;
 using HotelBooking.Application.Interfaces;
@@ -33,13 +36,7 @@ public class HotelController : ControllerBase
     public async Task<ActionResult<PagedResult<HotelResponse>>> Search(
         [FromQuery] HotelSearchParameters parameters)
     {
-        var validatedParams = parameters with
-        {
-            PageNumber = parameters.PageNumber < 1 ? 1 : parameters.PageNumber,
-            PageSize = (parameters.PageSize < 1 || parameters.PageSize > 50) ? 10 : parameters.PageSize
-        };
-
-        var results = await _hotelService.SearchHotelsAsync(validatedParams);
+        var results = await _hotelService.SearchHotelsAsync(parameters);
         return Ok(results);
     }
 
@@ -59,12 +56,6 @@ public class HotelController : ControllerBase
         [FromQuery] DateTimeOffset checkIn,
         [FromQuery] DateTimeOffset checkOut)
     {
-        var hotel = await _hotelService.GetByIdAsync(id);
-        if (hotel == null)
-        {
-            return NotFound(new { message = $"Hotel with Id {id} not found." });
-        }
-
         var rooms = await _roomsService.GetAvailableRoomsByHotelIdAsync(id, checkIn, checkOut);
         return Ok(rooms);
     }
