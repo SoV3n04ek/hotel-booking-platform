@@ -35,7 +35,7 @@ public class DbInitializer
             {
                 Name = "System Admin",
                 Email = "admin@hotelbooking.com",
-                PassworHash = "hashed_password_placeholder", 
+                PasswordHash = "hashed_password_placeholder", 
                 Role = UserRole.Admin
             };
 
@@ -43,7 +43,7 @@ public class DbInitializer
             {
                 Name = "John Doe",
                 Email = "john.doe@example.com",
-                PassworHash = "hashed_password_placeholder",
+                PasswordHash = "hashed_password_placeholder",
                 Role = UserRole.User
             };
 
