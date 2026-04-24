@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using HotelBooking.Application.DTOs;
 using HotelBooking.Application.DTOs.Hotels;
@@ -23,13 +25,20 @@ public class HotelController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateHotelRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateHotelRequest request, CancellationToken ct)
     {
-        if (request == null) return BadRequest();
+        var hotelId = await _hotelService.CreateHotelAsync(request, ct);
+        var response = await _hotelService.GetByIdAsync(hotelId, ct);
 
-        var hotelId = await _hotelService.CreateHotelAsync(request);
+        if (response == null)
+        {
+            return UnprocessableEntity(new
+                {
+                    message = "Hotel was created but could not be retrieved"
+                });
+        }
 
-        return CreatedAtAction(nameof(GetById), new { id = hotelId }, request);
+        return CreatedAtAction(nameof(GetById), new { id = hotelId }, response);
     }
 
     [HttpGet("search")]

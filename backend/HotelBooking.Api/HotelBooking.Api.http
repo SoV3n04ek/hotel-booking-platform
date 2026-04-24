@@ -6,16 +6,29 @@
 @roomId = 1
 
 ### \\\\ HOTEL endpoints ////
-
+    
 ### Create new hotel
 POST {{host}}/api/Hotel
 Content-Type: application/json
 
 {
   "name": "Grand Central Hotel",
-  "address": "Kyiv, Khershchatyk St, 1",
+  "address": "Kyiv, Khreshchatyk St, 1",
   "description": "Luxurious hotel in the heart of the capital with a great view."
 }
+
+###
+POST {{host}}/api/Hotel
+Content-Type: application/json
+{
+  "name": "Swiss Mountains Luxury Hotel",
+  "address": "Swiss Olympic Museum",
+  "description": "long description"
+}
+
+### Get Hotel by ID
+GET {{host}}/api/Hotel/1
+Accept: application/json
 
 ### Hotel searching (with pagination and sorting)
 GET {{host}}/api/Hotel/search?city=Kyiv&searchTerm=Grand&pageNumber=1&pageSize=5&sortBy=name&sortOrder=asc

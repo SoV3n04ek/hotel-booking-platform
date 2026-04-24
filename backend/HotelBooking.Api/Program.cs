@@ -46,7 +46,7 @@ public class Program
         builder.Services.AddValidatorsFromAssemblyContaining<BookingValidator>();
 
         // Database and Unit of Work
-        builder.Services.AddScoped<IUnitOfWork, HotelsDbContext>();
+        builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<HotelsDbContext>());
 
         builder.Services.AddControllers();
 
