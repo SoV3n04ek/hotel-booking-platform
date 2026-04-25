@@ -1,5 +1,6 @@
 ﻿using HotelBooking.Application.DTOs.Rooms;
 using HotelBooking.Application.Interfaces;
+using HotelBooking.Domain.Entities;
 
 namespace HotelBooking.Application.Services;
 
@@ -53,4 +54,47 @@ public class RoomService : IRoomService
             true
         );
     }
+
+    public async Task<int> CreateRoomAsync(CreateRoomRequest request, CancellationToken ct = default)
+    {
+        var room = new Room()
+        {
+            HotelId = request.HotelId,
+            PricePerNight = request.PricePerNight,
+            Capacity = request.Capacity
+        };
+
+        await _roomRepository.AddAsync(room, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        return room.Id;
+    }
+
+    public async Task UpdateRoomAsync(int id, UpdateRoomRequest request, CancellationToken ct = default)
+    {
+        var room = await _roomRepository.GetByIdAsync(id, ct);
+        if (room == null)
+        {
+            throw new KeyNotFoundException("Room not found");
+        }
+
+        room.PricePerNight = request.PricePerNight;
+        room.Capacity = request.Capacity;
+
+        _roomRepository.Update(room);
+        await _unitOfWork.SaveChangesAsync(ct);
+    }
+    /*
+    public async Task DeleteRoomAsync(int id, CancellationToken ct = default)
+    {
+        var room = _roomRepository.GetByIdAsync(id, ct);
+
+        if (room == null)
+        {
+            throw new Exception("There is no room with this id for deletion");
+        }
+
+        _roomRepository.Delete(room);
+    }
+    */
 }

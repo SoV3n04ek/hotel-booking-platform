@@ -27,7 +27,7 @@ Content-Type: application/json
 }
 
 ### Get Hotel by ID
-GET {{host}}/api/Hotel/1
+GET {{host}}/api/Hotel/4
 Accept: application/json
 
 ### Hotel searching (with pagination and sorting)
