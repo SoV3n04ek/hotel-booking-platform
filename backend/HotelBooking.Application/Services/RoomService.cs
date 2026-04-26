@@ -84,17 +84,17 @@ public class RoomService : IRoomService
         _roomRepository.Update(room);
         await _unitOfWork.SaveChangesAsync(ct);
     }
-    /*
+    
     public async Task DeleteRoomAsync(int id, CancellationToken ct = default)
     {
-        var room = _roomRepository.GetByIdAsync(id, ct);
+        var room = await _roomRepository.GetByIdAsync(id, ct);
 
         if (room == null)
         {
-            throw new Exception("There is no room with this id for deletion");
+            throw new KeyNotFoundException($"Room with ID {id} not found for deletion.");
         }
 
         _roomRepository.Delete(room);
+        await _unitOfWork.SaveChangesAsync(ct);
     }
-    */
 }
