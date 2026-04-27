@@ -1,4 +1,3 @@
-
 using System.Threading.Tasks;
 using FluentValidation;
 using HotelBooking.Api.Middleware;
@@ -44,6 +43,7 @@ public class Program
         // Validation
         builder.Services.AddValidatorsFromAssemblyContaining<CreateBookingRequestValidator>();
         builder.Services.AddValidatorsFromAssemblyContaining<BookingValidator>();
+        builder.Services.AddValidatorsFromAssemblyContaining<CreateRoomRequestValidator>();
 
         // Database and Unit of Work
         builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<HotelsDbContext>());

@@ -2,6 +2,7 @@
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Services;
 using HotelBooking.Domain.Entities;
+using HotelBooking.Application.DTOs.Rooms;
 using Moq;
 using Xunit;
 
@@ -133,5 +134,50 @@ public class RoomServiceTest
         result.PricePerNight.Should().Be(300m);
         result.Capacity.Should().Be(3);
         result.IsAvailable.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task CreateRoomAsync_ShouldReturnId_WhenSuccessful()
+    {
+
+        var request = new CreateRoomRequest(1, 200m, 2);
+
+        var resultId = await _service.CreateRoomAsync(request);
+
+        _roomRepo.Verify(r => r.AddAsync(It.IsAny<Room>(), It.IsAny<CancellationToken>()), Times.Once);
+        _uow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateRoomAsync_ShouldThrowKeyNotFound_WhenRoomMissing()
+    {
+        // Arrange
+        _roomRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Room?)null);
+
+        var request = new UpdateRoomRequest(250m, 3);
+
+        // Act
+        var act = async () => await _service.UpdateRoomAsync(999, request);
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>();
+    }
+
+    [Fact]
+    public async Task DeleteRoomAsync_ShouldCallDeleteAndSave_WhenRoomExists()
+    {
+        // Arrange
+        var room = new Room { Id = 1 };
+        _roomRepo.Setup(r => r.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(room);
+
+        // Act
+        await _service.DeleteRoomAsync(1);
+
+        // Assert
+        _roomRepo.Verify(r => r.Delete(room), Times.Once);
+        _uow.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+
     }
 }
