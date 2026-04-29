@@ -2,7 +2,7 @@ using HotelBooking.Domain.Common;
 
 namespace HotelBooking.Domain.Entities;
 
-public class Room : BaseEntity
+public class Room : BaseEntity<int>
 {
     public decimal PricePerNight { get; set; }
     public int Capacity { get; set; }

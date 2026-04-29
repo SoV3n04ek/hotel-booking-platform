@@ -2,7 +2,7 @@ using HotelBooking.Domain.Common;
 
 namespace HotelBooking.Domain.Entities;
 
-public class Booking : BaseEntity
+public class Booking : BaseEntity<int>
 {
     public int UserId { get; set; }
     public User User { get; set; } = null!;
