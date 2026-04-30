@@ -12,4 +12,5 @@ public class Room : BaseEntity<int>
     public uint Version { get; set; }
 
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    public ICollection<RoomImage> Images { get; set; } = new List<RoomImage>();
 }
