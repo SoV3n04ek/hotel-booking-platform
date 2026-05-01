@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Ignore all user-uploaded files
+HotelBooking.Api/wwwroot/uploads/**/*
+
+# Except for the directory structure itself
+!HotelBooking.Api/wwwroot/uploads/hotels/.gitkeep
+!HotelBooking.Api/wwwroot/uploads/rooms/.gitkeep
+
 # User-specific files
 *.rsuser
 *.suo
