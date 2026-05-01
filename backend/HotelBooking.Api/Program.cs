@@ -6,6 +6,7 @@ using HotelBooking.Application.Services;
 using HotelBooking.Application.Validators;
 using HotelBooking.Infrastructure;
 using HotelBooking.Infrastructure.Repositories;
+using HotelBooking.Infrastructure.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -34,7 +35,8 @@ public class Program
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();
         builder.Services.AddScoped<IHotelRepository, HotelRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
-        
+        builder.Services.AddScoped<IFileService, LocalFileService>();
+
         // Application
         builder.Services.AddScoped<IBookingService, BookingService>();
         builder.Services.AddScoped<IHotelService, HotelService>();

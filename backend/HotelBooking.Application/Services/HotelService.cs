@@ -3,6 +3,7 @@ using HotelBooking.Application.DTOs.Hotels;
 using HotelBooking.Application.Interfaces;
 using HotelBooking.Application.Mappers;
 using HotelBooking.Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelBooking.Application.Services;
@@ -78,5 +79,10 @@ public class HotelService : IHotelService
         await _unitOfWork.SaveChangesAsync(ct);
 
         return hotel.Id;
+    }
+
+    public Task AddImageAsync(int hotelId, IFormFile file, string altText, bool IsPrimary, CancellationToken ct = default)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -18,16 +18,18 @@ public class HotelsDbContext : DbContext, IUnitOfWork
     {
         var entries = ChangeTracker
             .Entries()
-            .Where(e => e.Entity is BaseEntity &&
-                (e.State == EntityState.Added || e.State == EntityState.Modified));
+            .Where(e => e.Entity is BaseEntity && // Catching the non-generic base
+                        (e.State == EntityState.Added || e.State == EntityState.Modified));
 
         foreach (var entityEntry in entries)
         {
-            ((BaseEntity)entityEntry.Entity).UpdatedAt = DateTimeOffset.UtcNow;
+            var entity = (BaseEntity)entityEntry.Entity;
+
+            entity.UpdatedAt = DateTimeOffset.UtcNow;
 
             if (entityEntry.State == EntityState.Added)
             {
-                ((BaseEntity)entityEntry.Entity).CreatedAt = DateTimeOffset.UtcNow;
+                entity.CreatedAt = DateTimeOffset.UtcNow;
             }
         }
 
@@ -126,6 +128,40 @@ public class HotelsDbContext : DbContext, IUnitOfWork
             entity.Property(b => b.DateCheckIn).IsRequired();
 
             entity.Property(b => b.DateCheckOut).IsRequired();
-        });        
+        });
+
+        // Hotel images
+        modelBuilder.Entity<HotelImage>(entity =>
+        {
+            entity.HasKey(i => i.Id);
+
+            entity.Property(i => i.Url)
+                .IsRequired()
+                .HasMaxLength(512);
+
+            entity.Property(i => i.AltText)
+                .HasMaxLength(256);
+
+            entity.HasOne(i => i.Hotel)
+                .WithMany(h => h.Images)
+                .HasForeignKey(i => i.HotelId);
+        });
+
+        // Room images
+        modelBuilder.Entity<RoomImage>(entity =>
+        {
+            entity.HasKey(i => i.Id);
+
+            entity.Property(i => i.Url)
+                .IsRequired()
+                .HasMaxLength(512);
+
+            entity.Property(i => i.AltText)
+                .HasMaxLength(256);
+
+            entity.HasOne(i => i.Room)
+                .WithMany(room => room.Images)
+                .HasForeignKey(i => i.RoomId);
+        });
     }
 }
