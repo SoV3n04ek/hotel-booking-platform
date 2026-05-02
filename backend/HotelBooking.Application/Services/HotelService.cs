@@ -12,11 +12,13 @@ public class HotelService : IHotelService
 {
     private readonly IHotelRepository _hotelRepository;
     private readonly IUnitOfWork _unitOfWork;
-    
-    public HotelService(IHotelRepository hotelRepository, IUnitOfWork unitOfWork)
+    private readonly IFileService _fileService;
+
+    public HotelService(IHotelRepository hotelRepository, IUnitOfWork unitOfWork, IFileService fileService)
     {
         _hotelRepository = hotelRepository;
         _unitOfWork = unitOfWork;
+        _fileService = fileService;
     }
 
     public async Task<PagedResult<HotelResponse>> SearchHotelsAsync(
@@ -81,8 +83,68 @@ public class HotelService : IHotelService
         return hotel.Id;
     }
 
-    public Task AddImageAsync(int hotelId, IFormFile file, string altText, bool IsPrimary, CancellationToken ct = default)
+    public async Task AddImageAsync(
+        int hotelId, 
+        IFormFile file, 
+        string altText, 
+        bool isPrimary, 
+        CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        if (file == null || file.Length == 0)
+        {
+            throw new ArgumentException("File is empty or null");
+        }
+
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!allowedExtensions.Contains(extension))
+        {
+            throw new ArgumentException("Invalid file format. Only JPG, PNG, and WEBP are allowed.");
+        }
+
+        var hotel = await _hotelRepository.GetByIdAsync(hotelId, ct);
+        if (hotel == null)
+        {
+            throw new KeyNotFoundException($"Hotel with ID{hotelId} not found.");
+        }
+
+        string? savedFileUrl = null;
+        try
+        {
+            savedFileUrl = await _fileService.SaveFileAsync(file, "hotels", ct);
+
+            if (isPrimary)
+            {
+                // Unset other primary images for this hotel
+                foreach (var img in hotel.Images.Where(i => i.IsPrimary))
+                {
+                    img.IsPrimary = false;
+                }
+            }
+
+            var hotelImage = new HotelImage
+            {
+                HotelId = hotelId,
+                Url = savedFileUrl,
+                AltText = altText,
+                IsPrimary = isPrimary,
+                DisplayOrder = hotel.Images.Count + 1
+            };
+
+            hotel.Images.Add(hotelImage);
+
+            await _unitOfWork.SaveChangesAsync(ct);
+        }
+        catch (Exception ex)
+        {
+            if (savedFileUrl != null)
+            {
+                await _fileService.DeleteFileAsync(savedFileUrl, ct);
+            }
+
+            // Re-throw to be caught by global exception handler
+            throw; 
+        }
+
     }
 }
