@@ -36,6 +36,7 @@ public class Program
         builder.Services.AddScoped<IHotelRepository, HotelRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IFileService, LocalFileService>();
+        builder.Services.AddScoped<IHotelImageRepository, HotelImageRepository>();
 
         // Application
         builder.Services.AddScoped<IBookingService, BookingService>();

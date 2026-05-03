@@ -68,4 +68,23 @@ public class HotelController : ControllerBase
         var rooms = await _roomsService.GetAvailableRoomsByHotelIdAsync(id, checkIn, checkOut);
         return Ok(rooms);
     }
+
+    [HttpPost("{id}/images")]
+    public async Task<IActionResult> UploadImages(int id, [FromForm] UploadImageRequest request)
+    {
+        var imageId = await _hotelService.AddImageAsync(id, request.File, request.AltText, request.IsPrimary);
+
+        return CreatedAtAction(nameof(GetImageById), new { imageId }, new { id = imageId });
+    }
+
+    [HttpGet("images/{imageId}")]
+    public async Task<ActionResult<HotelImageResponse>> GetImageById(Guid imageId)
+    {
+        var response = await _hotelService.GetImageMetadataAsync(imageId);
+
+        if (response == null)
+            return NotFound();
+
+        return Ok(response);
+    }
 }

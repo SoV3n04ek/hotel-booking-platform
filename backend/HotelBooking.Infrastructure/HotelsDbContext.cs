@@ -13,6 +13,8 @@ public class HotelsDbContext : DbContext, IUnitOfWork
     public DbSet<Room> Rooms => Set<Room>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<HotelImage> HotelImages => Set<HotelImage>();
+    public DbSet<RoomImage> RoomImages => Set<RoomImage>();
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
